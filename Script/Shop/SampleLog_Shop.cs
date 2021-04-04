@@ -1,0 +1,32 @@
+﻿using UnityEngine;
+using UnityEngine.UI;
+
+namespace Shop
+{
+    public class SampleLog_Shop : MonoBehaviour
+    {
+        private const string LOG_PREFIX = "SampleLog";
+        private static string logString;
+
+        [SerializeField]
+        private Text logTxt;
+
+        private void Start()
+        {
+            logTxt = GetComponent<Text>();
+        }
+
+        private void Update()
+        {
+            logTxt.text = logString;
+        }
+
+        public static void Log(string log)
+        {
+            log = string.Format("[{0}] {1}", LOG_PREFIX, log);
+
+            Debug.Log(log);
+            logString = log;
+        }
+    }
+}
