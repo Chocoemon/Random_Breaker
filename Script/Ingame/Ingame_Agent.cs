@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,8 +24,8 @@ namespace Ingame
             get
             {
                 float amountTime = playingTime;
-                int minutes = Mathf.FloorToInt(amountTime / 60f);
-                float seconds = Mathf.Floor(amountTime % 60);
+                float minutes = Mathf.Floor(amountTime / 60f);
+                float seconds = Mathf.Floor(amountTime % 60f);
                 float millisecond = (float)Math.Floor(playingTime*100%100);
                 return string.Format("{0:0}:{1:00}.{2:00}", minutes, seconds, millisecond);
 
@@ -75,10 +75,6 @@ namespace Ingame
             Die_Count = PlayerPrefs.GetInt("DieCount");
             Pause();
             flag = false;
-            LeaderboardApi.AddExp(playingTime,1); // 전체 랭킹 등록
-            LeaderboardApi.AddExp(playingTime,2); // 일간 랭킹 등록
-            LeaderboardApi.AddExp(playingTime,3); // 월간 랭킹 등록 
-
             ingame.Whistle.Play();
             ingame.PrintResult();
             Destroy(ingame.transform.GetChild(5).GetChild(8).gameObject);
@@ -86,15 +82,19 @@ namespace Ingame
 
             if (PlayerPrefs.GetInt("noads", 0) == 0)
             {
-                if (Die_Count >= 3)
+                if (Die_Count >= 2)
                 {
                     RewardAd.Show_RewardAd(callback =>
                     {
                         if (callback)
+                        {
                             Die_Count = 0;
+                        }
 
                         else
-                            Die_Count = 3;
+                        {
+                            Die_Count = 3; 
+                        }
 
                     });
                 }
@@ -103,6 +103,9 @@ namespace Ingame
                     ++Die_Count;
 
                 PlayerPrefs.SetInt("DieCount", Die_Count);
+                LeaderboardApi.AddExp(playingTime, 1); // 전체 랭킹 등록
+                LeaderboardApi.AddExp(playingTime, 2); // 일간 랭킹 등록
+                LeaderboardApi.AddExp(playingTime, 3); // 월간 랭킹 등록 
             }
         }
 
@@ -143,9 +146,13 @@ namespace Ingame
             
         }
 
+        public void penalty()
+        {
+            playingTime += 0.5f;
+        }
+
         public void Start_Spawn()
         {
-            AudioListener.volume = 1;
             if (block_spawner == null)
             {
                 block_spawner = new BlockAgent(ingame.transform.GetChild(5));
