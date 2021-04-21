@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using GoogleMobileAds.Api;
 
 namespace Toast.Gamebase.Gamebase_Intro
 {
@@ -75,6 +76,7 @@ namespace Toast.Gamebase.Gamebase_Intro
 
         private void HideBI()
         {
+            MobileAds.Initialize(initStatus => { } );
             BiTweenAlpha(biTweenObject, 1f, 0f, 1f, "LoadLoginScene");
             PoweredByTweenAlpha(poweredByTweenObject, 1f, 0f, 1f, string.Empty);
         }
