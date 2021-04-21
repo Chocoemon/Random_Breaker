@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -144,12 +144,9 @@ namespace Toast.Gamebase.Gamebase_Intro
 
         private void LoginForLastLoggedInProvider()
         {
-
-
-#if UNITY_ANDROID
             if (string.IsNullOrEmpty(Gamebase.GetLastLoggedInProvider()) == true)
            {
-
+#if UNITY_ANDROID
                 Gamebase.Login(GamebaseAuthProvider.GOOGLE, (authToken, error) =>
                 {
                     if (Gamebase.IsSuccess(error) == true)
@@ -182,8 +179,43 @@ namespace Toast.Gamebase.Gamebase_Intro
                         }
                     }
                 });
+#elif UNITY_IOS
+                Gamebase.Login(GamebaseAuthProvider.GAMECENTER, (authToken, error) =>
+                {
+                    if (Gamebase.IsSuccess(error) == true)
+                    {
+                        string userId = authToken.member.userId;
+                        SampleLogger.Log(string.Format("Login succeeded. Gamebase userId is {0}", userId));
+                        HideBI();
+                    }
+
+                    else
+                    {
+                        // Check the error code and handle the error appropriately.
+                        SampleLogger.Log(string.Format("Login failed. error is {0}", error));
+                        if (error.code == GamebaseErrorCode.AUTH_EXTERNAL_LIBRARY_ERROR)
+                        {
+                            GamebaseError moduleError = error.error; // GamebaseError.error object from external module
+                            if (null != moduleError)
+                            {
+                                int moduleErrorCode = moduleError.code;
+                                string moduleErrorMessage = moduleError.message;
+                                SampleLogger.Log(string.Format("moduleErrorCode:{0}, moduleErrorMessage:{1}", moduleErrorCode, moduleErrorMessage));
+                            }
+                        }
+                        if (error.code == GamebaseErrorCode.BANNED_MEMBER)
+                        {
+                            GamebaseResponse.Auth.BanInfo banInfo = GamebaseResponse.Auth.BanInfo.From(error);
+                            if (banInfo != null)
+                            {
+                            }
+                        }
+                    }
+                });
+#endif
 
             }
+
             else
             {
                 Gamebase.LoginForLastLoggedInProvider((authToken, error) =>
@@ -196,23 +228,6 @@ namespace Toast.Gamebase.Gamebase_Intro
 
                 });
             }
-#endif
-
-#if UNITY_EDITOR
-                
-                Gamebase.Login(GamebaseAuthProvider.GUEST, (authToken, error) =>
-                {
-                    if (Gamebase.IsSuccess(error) == true)
-                    {
-                        SampleLogger.Log(string.Format("Guest login succeeded. User id is {0}", authToken.member.userId));
-                        HideBI();
-                    }
-                    else
-                    {
-                        SampleLogger.Log(string.Format("Guest login failed. Error is {0}", error.ToString()));
-                    }
-                });
-#endif
         }
     }
 }
